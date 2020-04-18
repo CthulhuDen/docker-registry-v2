@@ -2,8 +2,10 @@
 
 namespace CthulhuDen\DockerRegistryV2\Authorization;
 
+use CthulhuDen\DockerRegistryV2\Authorization\Challenge\ChallengeParserInterface;
 use CthulhuDen\DockerRegistryV2\Authorization\Exception\InvalidAuthorizationResponseException;
 use CthulhuDen\DockerRegistryV2\Authorization\Exception\InvalidChallengeException;
+use CthulhuDen\DockerRegistryV2\Authorization\Store\CacheStoreInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\RequestInterface;
@@ -14,21 +16,27 @@ class AuthorizingClient implements ClientInterface
     private $inner;
     private $challengeParser;
     private $requestFactory;
+    private $tokenStore;
+    private $keepOldScopes;
 
     private $user;
     private $password;
-    private $token = null;
+    private $oldScopes = [];
 
     public function __construct(
         ClientInterface $inner,
         ChallengeParserInterface $challengeParser,
         RequestFactoryInterface $requestFactory,
+        CacheStoreInterface $tokenStore,
         string $user,
-        string $password
+        string $password,
+        bool $keepOldScopes = true
     ) {
         $this->inner = $inner;
         $this->challengeParser = $challengeParser;
         $this->requestFactory = $requestFactory;
+        $this->tokenStore = $tokenStore;
+        $this->keepOldScopes = $keepOldScopes;
 
         $this->user = $user;
         $this->password = $password;
@@ -43,7 +51,7 @@ class AuthorizingClient implements ClientInterface
             $authRequest = $this->createAuthRequest($challenge);
             $authResponse = $this->sendAuthRequest($authRequest);
 
-            $this->token = $this->extractToken($authResponse);
+            $this->tokenStore->setToken($this->extractToken($authResponse));
 
             $response = $this->sendWithCurrentToken($request);
         }
@@ -53,8 +61,8 @@ class AuthorizingClient implements ClientInterface
 
     private function sendWithCurrentToken(RequestInterface $request): ResponseInterface
     {
-        if ($this->token !== null) {
-            $request = $request->withHeader('Authorization', "Bearer {$this->token}");
+        if (($token = $this->tokenStore->getToken()) !== null) {
+            $request = $request->withHeader('Authorization', "Bearer {$token}");
         }
 
         return $this->inner->sendRequest($request);
@@ -70,7 +78,7 @@ class AuthorizingClient implements ClientInterface
         return $this->challengeParser->parse($challengeLine);
     }
 
-    private function createAuthRequest(Challenge $challenge)
+    protected function createAuthRequest(Challenge $challenge)
     {
         $authRequest = $this->requestFactory->createRequest('GET', $challenge->getEndpoint());
 
@@ -78,16 +86,32 @@ class AuthorizingClient implements ClientInterface
 
         parse_str($uri->getQuery(), $query);
 
-        foreach ($challenge->getParameters() as $key => $value) {
-            if ($key === 'error') {
-                continue;
+        $query['service'] = $challenge->getService();
+
+        $scopes = $challenge->getScopes();
+
+        if ($this->keepOldScopes) {
+            $scopes = $this->oldScopes = array_unique(array_merge($this->oldScopes, $scopes));
+        }
+
+        if (isset($query['scope'])) {
+            if (is_array($query['scope'])) {
+                $scopes = array_merge($query['scopes'], $scopes);
+            } else {
+                array_unshift($scopes, $query['scopes']);
             }
 
-            $query[$key] = $value;
+            unset($query['scope']);
+        }
+
+        $query = http_build_query($query);
+
+        foreach ($scopes as $scope) {
+            $query .= '&scope=' . urlencode($scope);
         }
 
         return $authRequest
-            ->withUri($uri->withQuery(http_build_query($query)))
+            ->withUri($uri->withQuery($query))
             ->withHeader('Authorization', 'Basic ' . base64_encode("{$this->user}:{$this->password}"));
     }
 
@@ -107,7 +131,7 @@ class AuthorizingClient implements ClientInterface
         return $response;
     }
 
-    private function extractToken(ResponseInterface $response): string
+    protected function extractToken(ResponseInterface $response): string
     {
         $json = $response->getBody()->getContents();
         $data = json_decode($json, true);

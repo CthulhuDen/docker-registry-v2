@@ -5,13 +5,14 @@ namespace CthulhuDen\DockerRegistryV2\Authorization;
 class Challenge
 {
     private $endpoint;
+    private $service;
+    private $scopes;
 
-    private $parameters;
-
-    public function __construct(string $endpoint, array $parameters)
+    public function __construct(string $endpoint, string $service, string ...$scopes)
     {
         $this->endpoint = $endpoint;
-        $this->parameters = $parameters;
+        $this->service = $service;
+        $this->scopes = $scopes;
     }
 
     public function getEndpoint(): string
@@ -19,8 +20,27 @@ class Challenge
         return $this->endpoint;
     }
 
-    public function getParameters(): array
+    public function getService(): string
     {
-        return $this->parameters;
+        return $this->service;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getScopes(): array
+    {
+        return $this->scopes;
+    }
+
+    /**
+     * @return self
+     */
+    public function withScopes(string ...$scopes): self
+    {
+        $clone = clone $this;
+        $clone->scopes = $scopes;
+
+        return $clone;
     }
 }

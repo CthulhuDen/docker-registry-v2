@@ -1,7 +1,8 @@
 <?php
 
-namespace CthulhuDen\DockerRegistryV2\Authorization;
+namespace CthulhuDen\DockerRegistryV2\Authorization\Challenge;
 
+use CthulhuDen\DockerRegistryV2\Authorization\Challenge;
 use CthulhuDen\DockerRegistryV2\Authorization\Exception\InvalidChallengeException;
 
 interface ChallengeParserInterface

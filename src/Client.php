@@ -23,12 +23,17 @@ class Client
     ) {
         $this->http = $http;
         $this->requestFactory = $requestFactory;
-        $this->endpoint = rtrim($endpoint, '/') . '/v2';
+        $this->endpoint = rtrim($endpoint, '/') . '/v2/';
     }
 
-    public function getManifest(string $image, string $tag = 'latest'): string
+    public function getIndex(): ResponseInterface
     {
-        $request = $this->buildRequest('GET', "/{$image}/manifests/{$tag}")
+        return $this->sendAndExpect2xx($this->buildRequest('GET', ''));
+    }
+
+    public function getManifest(ImageId $image): string
+    {
+        $request = $this->buildRequest('GET', "{$image->getName()}/manifests/{$image->getTag()}")
             ->withHeader('Accept', self::MANIFEST_TYPE);
 
         $response = $this->sendAndExpect2xx($request);
@@ -36,9 +41,9 @@ class Client
         return $response->getBody()->getContents();
     }
 
-    public function putManifest(string $image, string $tag, string $manifest): void
+    public function putManifest(ImageId $image, string $manifest): void
     {
-        $request = $this->buildRequest('PUT', "/{$image}/manifests/{$tag}")
+        $request = $this->buildRequest('PUT', "{$image->getName()}/manifests/{$image->getTag()}")
             ->withHeader('Content-type', self::MANIFEST_TYPE)
             ->withBody(Stream::create($manifest));
 
@@ -47,6 +52,8 @@ class Client
 
     private function buildRequest(string $method, string $path): RequestInterface
     {
+        $path = ltrim($path, '/');
+
         return $this->requestFactory->createRequest($method, "{$this->endpoint}{$path}");
     }
 

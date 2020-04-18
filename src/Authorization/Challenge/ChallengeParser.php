@@ -1,7 +1,8 @@
 <?php
 
-namespace CthulhuDen\DockerRegistryV2\Authorization;
+namespace CthulhuDen\DockerRegistryV2\Authorization\Challenge;
 
+use CthulhuDen\DockerRegistryV2\Authorization\Challenge;
 use CthulhuDen\DockerRegistryV2\Authorization\Exception\InvalidChallengeException;
 use vektah\parser_combinator\combinator\Choice;
 use vektah\parser_combinator\combinator\Many;
@@ -69,14 +70,20 @@ final class ChallengeParser implements ChallengeParserInterface
                 new EofParser(),
             ),
             function (array $data): Challenge {
-                $endpoint = null;
-                $parameters = [];
+                $endpoint = $service = null;
+                $scopes = [];
 
                 foreach ($data[0] as list($key, $value)) {
-                    if ($key === 'realm') {
-                        $endpoint = $value;
-                    } else {
-                        $parameters[$key] = $value;
+                    switch ($key) {
+                        case 'realm':
+                            $endpoint = $value;
+                            break;
+                        case 'service':
+                            $service = $value;
+                            break;
+                        case 'scope':
+                            $scopes[] = $value;
+                            break;
                     }
                 }
 
@@ -84,7 +91,11 @@ final class ChallengeParser implements ChallengeParserInterface
                     throw new GrammarException('realm must be set');
                 }
 
-                return new Challenge($endpoint, $parameters);
+                if ($service === null) {
+                    throw new GrammarException('service must be set');
+                }
+
+                return new Challenge($endpoint, $service, ...$scopes);
             },
         );
     }

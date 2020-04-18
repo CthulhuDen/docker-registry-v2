@@ -3,7 +3,7 @@
 namespace CthulhuDen\DockerRegistryV2\Tests\Authorization;
 
 use CthulhuDen\DockerRegistryV2\Authorization\Challenge;
-use CthulhuDen\DockerRegistryV2\Authorization\ChallengeParser;
+use CthulhuDen\DockerRegistryV2\Authorization\Challenge\ChallengeParser;
 use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
 use PHPUnit\Framework\TestCase;
 

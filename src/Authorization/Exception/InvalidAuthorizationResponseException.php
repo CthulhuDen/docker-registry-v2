@@ -2,7 +2,6 @@
 
 namespace CthulhuDen\DockerRegistryV2\Authorization\Exception;
 
-use CthulhuDen\DockerRegistryV2\Authorization\Exception\AuthorizationException;
 use Psr\Http\Message\ResponseInterface;
 
 class InvalidAuthorizationResponseException extends AuthorizationException
