@@ -1,6 +1,6 @@
 <?php
 
-namespace CthulhuDen\DockerRegistryV2\Tests\Authorization;
+namespace CthulhuDen\DockerRegistryV2\Tests\Authorization\Challenge;
 
 use CthulhuDen\DockerRegistryV2\Authorization\Challenge;
 use CthulhuDen\DockerRegistryV2\Authorization\Challenge\ChallengeParser;
@@ -25,9 +25,7 @@ class ChallengeParserTest extends TestCase
 
         $this->assertInstanceOf(Challenge::class, $challenge);
         $this->assertSame('https://example.com/token', $challenge->getEndpoint());
-        $this->assertArraySubset([
-            'service' => 'registry',
-            'scope' => 'some, :god:\damn:"scope',
-        ], $challenge->getParameters(), true);
+        $this->assertSame('registry', $challenge->getService());
+        $this->assertSame(['some,', ':god:\damn:"scope'], $challenge->getScopes());
     }
 }

@@ -70,8 +70,7 @@ final class ChallengeParser implements ChallengeParserInterface
                 new EofParser(),
             ),
             function (array $data): Challenge {
-                $endpoint = $service = null;
-                $scopes = [];
+                $endpoint = $service = $scope = null;
 
                 foreach ($data[0] as list($key, $value)) {
                     switch ($key) {
@@ -82,7 +81,7 @@ final class ChallengeParser implements ChallengeParserInterface
                             $service = $value;
                             break;
                         case 'scope':
-                            $scopes[] = $value;
+                            $scope = $value;
                             break;
                     }
                 }
@@ -94,6 +93,8 @@ final class ChallengeParser implements ChallengeParserInterface
                 if ($service === null) {
                     throw new GrammarException('service must be set');
                 }
+
+                $scopes = preg_split('/[ ]+/', trim($scope));
 
                 return new Challenge($endpoint, $service, ...$scopes);
             },
