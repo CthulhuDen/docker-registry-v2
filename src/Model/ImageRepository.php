@@ -1,6 +1,6 @@
 <?php
 
-namespace CthulhuDen\DockerRegistryV2;
+namespace CthulhuDen\DockerRegistryV2\Model;
 
 class ImageRepository
 {
@@ -14,10 +14,5 @@ class ImageRepository
     public function getName(): string
     {
         return $this->name;
-    }
-
-    public function withTag(string $tag): ImageId
-    {
-        return new ImageId($this->getName(), $tag);
     }
 }

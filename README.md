@@ -19,7 +19,7 @@ use CthulhuDen\DockerRegistryV2\Authorization\AuthorizingClient;
 use CthulhuDen\DockerRegistryV2\Authorization\Challenge\ChallengeParser;
 use CthulhuDen\DockerRegistryV2\Authorization\Store\CachedTokenStore;
 use CthulhuDen\DockerRegistryV2\Client as RegistryClient;
-use CthulhuDen\DockerRegistryV2\ImageRepository;
+use CthulhuDen\DockerRegistryV2\Model\ImageId;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestInterface;
@@ -142,11 +142,10 @@ $client = new AuthorizingClient(
 );
 
 // Finally create the API client.
-$registryClient = new RegistryClient($client, $psr17Factory, 'https://registry.example.com');
+$registryClient = new RegistryClient($client, $psr17Factory, $psr17Factory, 'https://registry.example.com');
 
-// We are going to push new tag (based on existing) in this image of the given registry.
-$imageRepo = new ImageRepository('group/repo/image');
-
-$manifest = $registryClient->getManifest($imageRepo->withTag('latest'));
-$registryClient->putManifest($imageRepo->withTag('retagged-latest'), $manifest);
+// We are going to push new tag into some repository based on existing tag in other repository.
+$sourceImage = new ImageId('group/project/image-source', 'latest');
+$targetImage = new ImageId('group/project/image-target', 'retagged-latest');
+$registryClient->retag($sourceImage, $targetImage);
 ```
