@@ -6,6 +6,9 @@ class Challenge
 {
     private $endpoint;
     private $service;
+    /**
+     * @psalm-var list<string>
+     */
     private $scopes;
 
     public function __construct(string $endpoint, string $service, string ...$scopes)
@@ -27,6 +30,7 @@ class Challenge
 
     /**
      * @return string[]
+     * @psalm-return list<string>
      */
     public function getScopes(): array
     {
@@ -34,7 +38,7 @@ class Challenge
     }
 
     /**
-     * @return self
+     * @return static
      */
     public function withScopes(string ...$scopes): self
     {

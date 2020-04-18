@@ -7,8 +7,19 @@ class BlobInfo
     private const TYPE_LAYER = 'application/vnd.docker.image.rootfs.diff.tar.gzip';
     private const TYPE_CONFIG = 'application/vnd.docker.container.image.v1+json';
 
+    /**
+     * @var string
+     */
     private $type;
+
+    /**
+     * @var int
+     */
     private $size;
+
+    /**
+     * @var string
+     */
     private $digest;
 
     public function __construct(string $type, int $size, string $digest)

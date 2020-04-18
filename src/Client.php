@@ -17,9 +17,24 @@ class Client
 {
     private const MANIFEST_TYPE = 'application/vnd.docker.distribution.manifest.v2+json';
 
+    /**
+     * @var ClientInterface
+     */
     private $http;
+
+    /**
+     * @var RequestFactoryInterface
+     */
     private $requestFactory;
+
+    /**
+     * @var UriFactoryInterface
+     */
     private $uriFactory;
+
+    /**
+     * @var string
+     */
     private $endpoint;
 
     public function __construct(
@@ -108,6 +123,25 @@ class Client
         }
 
         $this->putManifest($new, $manifest);
+    }
+
+    /**
+     * @return array<int, ImageId>
+     * @psalm-return list<ImageId>
+     */
+    public function getTags(ImageRepository $repository): array
+    {
+        $request = $this->buildRequest('GET', "{$repository->getName()}/tags/list");
+
+        /** @psalm-var array{tags:list<string>} $data */
+        $data = json_decode((string) $this->sendAndExpect2xx($request)->getBody(), true);
+
+        $return = [];
+        foreach ($data['tags'] as $tagName) {
+            $return[] = new ImageId($repository, $tagName);
+        }
+
+        return $return;
     }
 
     private function buildRequest(string $method, string $path): RequestInterface

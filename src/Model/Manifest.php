@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * @psalm-type Blob=array{mediaType:string,size:int,digest:string}
+ */
+
 namespace CthulhuDen\DockerRegistryV2\Model;
 
 class Manifest
@@ -17,10 +21,12 @@ class Manifest
     }
 
     /**
-     * @return BlobInfo[]
+     * @return array<int, BlobInfo>
+     * @psalm-return list<BlobInfo>
      */
     public function getLayers(): array
     {
+        /** @psalm-var array{layers:list<Blob>} $data */
         $data = json_decode($this->content, true);
 
         $return = [];
@@ -33,8 +39,11 @@ class Manifest
 
     public function getConfig(): BlobInfo
     {
-        $data = json_decode($this->content, true)['config'];
+        /** @psalm-var array{config:Blob} $data */
+        $data = json_decode($this->content, true);
 
-        return new BlobInfo($data['mediaType'], $data['size'], $data['digest']);
+        $blob = $data['config'];
+
+        return new BlobInfo($blob['mediaType'], $blob['size'], $blob['digest']);
     }
 }

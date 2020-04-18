@@ -7,13 +7,16 @@ use Throwable;
 
 class InvalidResponseException extends \Exception
 {
+    /**
+     * @var ResponseInterface
+     */
     private $response;
 
-    public function __construct($message, ResponseInterface $response, Throwable $previous = null)
+    public function __construct(string $message, ResponseInterface $response, Throwable $previous = null)
     {
-        parent::__construct($message, 0, $previous);
-
         $this->response = $response;
+
+        parent::__construct($message, 0, $previous);
     }
 
     public function getResponse(): ResponseInterface

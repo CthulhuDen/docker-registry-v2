@@ -4,11 +4,18 @@ namespace CthulhuDen\DockerRegistryV2\Model;
 
 class ImageId
 {
+    /**
+     * @var ImageRepository
+     */
     private $repository;
+
+    /**
+     * @var string
+     */
     private $tag;
 
     /**
-     * @param string|ImageId $repository
+     * @param string|ImageRepository $repository
      */
     public function __construct($repository, string $tag = 'latest')
     {

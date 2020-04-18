@@ -17,7 +17,13 @@ class CachedTokenStore implements CacheStoreInterface
 
     public function getToken(): ?string
     {
-        return $this->cache->get($this->cacheKey);
+        /** @var mixed $token */
+        $token = $this->cache->get($this->cacheKey);
+        if (is_string($token)) {
+            return $token;
+        }
+
+        return null;
     }
 
     public function setToken(string $token): void

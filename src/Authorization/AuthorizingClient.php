@@ -21,6 +21,10 @@ class AuthorizingClient implements ClientInterface
 
     private $user;
     private $password;
+    /**
+     * @var array<int, string>
+     * @psalm-var list<string>
+     */
     private $oldScopes = [];
 
     public function __construct(
@@ -78,7 +82,7 @@ class AuthorizingClient implements ClientInterface
         return $this->challengeParser->parse($challengeLine);
     }
 
-    protected function createAuthRequest(Challenge $challenge)
+    protected function createAuthRequest(Challenge $challenge): RequestInterface
     {
         $authRequest = $this->requestFactory->createRequest('GET', $challenge->getEndpoint());
 
@@ -91,14 +95,20 @@ class AuthorizingClient implements ClientInterface
         $scopes = $challenge->getScopes();
 
         if ($this->keepOldScopes) {
-            $scopes = $this->oldScopes = array_unique(array_merge($this->oldScopes, $scopes));
+            foreach ($scopes as $scope) {
+                if (!in_array($scope, $this->oldScopes)) {
+                    $this->oldScopes[] = $scope;
+                }
+            }
+            $scopes = $this->oldScopes;
         }
 
         if (isset($query['scope'])) {
             if (is_array($query['scope'])) {
-                $scopes = array_merge($query['scopes'], $scopes);
+                $query['scope'] = array_filter($query['scope'], 'is_string');
+                $scopes = array_merge($query['scope'], $scopes);
             } else {
-                array_unshift($scopes, $query['scopes']);
+                array_unshift($scopes, (string) $query['scope']);
             }
 
             unset($query['scope']);
@@ -134,6 +144,7 @@ class AuthorizingClient implements ClientInterface
     protected function extractToken(ResponseInterface $response): string
     {
         $json = $response->getBody()->getContents();
+        /** @psalm-var array{token:string} $data */
         $data = json_decode($json, true);
 
         return $data['token'];

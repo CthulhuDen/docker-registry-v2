@@ -6,13 +6,16 @@ use Psr\Http\Message\ResponseInterface;
 
 class InvalidAuthorizationResponseException extends AuthorizationException
 {
+    /**
+     * @var ResponseInterface
+     */
     private $response;
 
     public function __construct(string $details, ResponseInterface $response)
     {
-        parent::__construct($details);
-
         $this->response = $response;
+
+        parent::__construct($details);
     }
 
     public function getResponse(): ResponseInterface
