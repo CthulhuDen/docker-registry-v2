@@ -1,0 +1,36 @@
+{
+    "name": "cthulhu/docker-registry-v2",
+    "description": "Http client for working with docker registry v2 API",
+    "type": "library",
+    "license": "MIT",
+    "homepage": "http://www.github.com/CthulhuDen/docker-registry-v2",
+    "authors": [
+        {
+            "name": "CthulhuDen",
+            "email": "cthulhu.den@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "CthulhuDen\\DockerRegistryV2\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "CthulhuDen\\DockerRegistryV2\\Tests\\": "tests/"
+        }
+    },
+    "require": {
+        "php": "^7.3",
+        "ext-json": "*",
+        "psr/http-client": "^1.0",
+        "vektah/parser-combinator": "^0.2.4",
+        "psr/http-factory": "^1.0",
+        "nyholm/psr7": "^1.2"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.1",
+        "dms/phpunit-arraysubset-asserts": "^0.2.0",
+        "kriswallsmith/buzz": "^1.1"
+    }
+}
