@@ -126,7 +126,7 @@ class Client
     }
 
     /**
-     * @return array<int, ImageId>
+     * @return array<int,ImageId>
      * @psalm-return list<ImageId>
      */
     public function getTags(ImageRepository $repository): array
@@ -142,6 +142,22 @@ class Client
         }
 
         return $return;
+    }
+
+    /**
+     * @return array<int,ImageRepository>
+     * @psalm-return list<ImageRepository>
+     */
+    public function getCatalog(): array
+    {
+        $request = $this->buildRequest('GET', '_catalog');
+
+        /** @psalm-var array{repositories:list<string>} $data */
+        $data = json_decode((string) $this->sendAndExpect2xx($request)->getBody(), true);
+
+        return array_map(function (string $repoName): ImageRepository {
+            return new ImageRepository($repoName);
+        }, $data['repositories']);
     }
 
     private function buildRequest(string $method, string $path): RequestInterface
