@@ -41,7 +41,7 @@ final class ChallengeParser implements ChallengeParserInterface
             return $this->parser;
         }
 
-        $intro = new RegexParser('Bearer', 'i', false);
+        $intro = new RegexParser('Beare', 'i', false);
         $space = new Ignore(new Many(' '));
 
         $propKey = new RegexParser('[a-z0-9]+', 'i');
