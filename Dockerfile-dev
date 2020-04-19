@@ -1,0 +1,9 @@
+FROM php:7.3-alpine
+
+#RUN apk add icu-dev && docker-php-ext-install intl
+
+COPY --from=composer /usr/bin/composer /usr/bin/composer
+
+COPY composer.lock composer.json /www/
+WORKDIR /www
+RUN composer install --no-scripts -oq

@@ -1,0 +1,45 @@
+---
+kind: pipeline
+type: docker
+name: prepare
+
+steps:
+- name: docker
+  image: docker
+  commands:
+  - docker build -t docker-registry-v2-drone:build . -f Dockerfile-dev
+  volumes:
+  - name: docker-sock
+    path: /var/run/docker.sock
+
+volumes:
+- name: docker-sock
+  host: { path: /var/run/docker.sock }
+
+---
+kind: pipeline
+type: docker
+name: analyze
+
+steps:
+- name: psalm
+  image: docker-registry-v2-drone:build
+  commands:
+  - mv /www/vendor vendor
+  - vendor/bin/psalm --show-info=true
+depends_on:
+- prepare
+
+---
+kind: pipeline
+type: docker
+name: test
+
+steps:
+- name: phpunit
+  image: docker-registry-v2-drone:build
+  commands:
+  - mv /www/vendor vendor
+  - vendor/bin/phpunit tests/
+depends_on:
+- prepare
