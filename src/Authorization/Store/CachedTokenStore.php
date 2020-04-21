@@ -4,7 +4,7 @@ namespace CthulhuDen\DockerRegistryV2\Authorization\Store;
 
 use Psr\SimpleCache\CacheInterface;
 
-class CachedTokenStore implements CacheStoreInterface
+class CachedTokenStore implements TokenStoreInterface
 {
     private $cache;
     private $cacheKey;

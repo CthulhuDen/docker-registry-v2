@@ -6,9 +6,7 @@ class Challenge
 {
     private $endpoint;
     private $service;
-    /**
-     * @psalm-var list<string>
-     */
+    /** @psalm-var list<string> */
     private $scopes;
 
     public function __construct(string $endpoint, string $service, string ...$scopes)

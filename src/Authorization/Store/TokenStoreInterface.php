@@ -2,7 +2,7 @@
 
 namespace CthulhuDen\DockerRegistryV2\Authorization\Store;
 
-interface CacheStoreInterface
+interface TokenStoreInterface
 {
     public function getToken(): ?string;
 

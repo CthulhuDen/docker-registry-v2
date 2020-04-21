@@ -18,9 +18,7 @@ use vektah\parser_combinator\parser\RepSep;
 
 final class ChallengeParser implements ChallengeParserInterface
 {
-    /**
-     * @var Parser|null
-     */
+    /** @var Parser|null */
     private $parser;
 
     public function parse(string $wwwAuthentication): Challenge

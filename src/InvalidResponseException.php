@@ -7,9 +7,7 @@ use Throwable;
 
 class InvalidResponseException extends \Exception
 {
-    /**
-     * @var ResponseInterface
-     */
+    /** @var ResponseInterface */
     private $response;
 
     public function __construct(string $message, ResponseInterface $response, Throwable $previous = null)

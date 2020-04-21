@@ -6,9 +6,7 @@ use Psr\Http\Message\ResponseInterface;
 
 class InvalidAuthorizationResponseException extends AuthorizationException
 {
-    /**
-     * @var ResponseInterface
-     */
+    /** @var ResponseInterface */
     private $response;
 
     public function __construct(string $details, ResponseInterface $response)

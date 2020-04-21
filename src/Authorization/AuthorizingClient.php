@@ -5,7 +5,7 @@ namespace CthulhuDen\DockerRegistryV2\Authorization;
 use CthulhuDen\DockerRegistryV2\Authorization\Challenge\ChallengeParserInterface;
 use CthulhuDen\DockerRegistryV2\Authorization\Exception\InvalidAuthorizationResponseException;
 use CthulhuDen\DockerRegistryV2\Authorization\Exception\InvalidChallengeException;
-use CthulhuDen\DockerRegistryV2\Authorization\Store\CacheStoreInterface;
+use CthulhuDen\DockerRegistryV2\Authorization\Store\TokenStoreInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\RequestInterface;
@@ -22,7 +22,7 @@ class AuthorizingClient implements ClientInterface
     private $user;
     private $password;
     /**
-     * @var array<int, string>
+     * @var array<int,string>
      * @psalm-var list<string>
      */
     private $oldScopes = [];
@@ -31,7 +31,7 @@ class AuthorizingClient implements ClientInterface
         ClientInterface $inner,
         ChallengeParserInterface $challengeParser,
         RequestFactoryInterface $requestFactory,
-        CacheStoreInterface $tokenStore,
+        TokenStoreInterface $tokenStore,
         string $user,
         string $password,
         bool $keepOldScopes = true

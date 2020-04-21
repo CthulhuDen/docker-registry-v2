@@ -4,14 +4,9 @@ namespace CthulhuDen\DockerRegistryV2\Model;
 
 class ImageId
 {
-    /**
-     * @var ImageRepository
-     */
+    /** @var ImageRepository */
     private $repository;
-
-    /**
-     * @var string
-     */
+    /** @var string */
     private $tag;
 
     /**

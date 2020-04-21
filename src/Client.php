@@ -17,24 +17,13 @@ class Client
 {
     private const MANIFEST_TYPE = 'application/vnd.docker.distribution.manifest.v2+json';
 
-    /**
-     * @var ClientInterface
-     */
+    /** @var ClientInterface */
     private $http;
-
-    /**
-     * @var RequestFactoryInterface
-     */
+    /** @var RequestFactoryInterface */
     private $requestFactory;
-
-    /**
-     * @var UriFactoryInterface
-     */
+    /** @var UriFactoryInterface */
     private $uriFactory;
-
-    /**
-     * @var string
-     */
+    /** @var string */
     private $endpoint;
 
     public function __construct(

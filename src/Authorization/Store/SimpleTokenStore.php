@@ -2,7 +2,7 @@
 
 namespace CthulhuDen\DockerRegistryV2\Authorization\Store;
 
-final class SimpleCacheStore implements CacheStoreInterface
+final class SimpleTokenStore implements TokenStoreInterface
 {
     private $token;
 
