@@ -35,4 +35,9 @@ class ImageId
     {
         return $this->repository;
     }
+
+    public function __toString(): string
+    {
+        return "{$this->getName()}:{$this->getTag()}";
+    }
 }
