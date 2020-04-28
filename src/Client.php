@@ -31,8 +31,7 @@ class Client
         RequestFactoryInterface $requestFactory,
         UriFactoryInterface $uriFactory,
         string $endpoint
-    )
-    {
+    ) {
         $this->http = $http;
         $this->requestFactory = $requestFactory;
         $this->uriFactory = $uriFactory;

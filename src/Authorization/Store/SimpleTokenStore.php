@@ -2,21 +2,19 @@
 
 namespace CthulhuDen\DockerRegistryV2\Authorization\Store;
 
+use CthulhuDen\DockerRegistryV2\Authorization\Token;
+
 final class SimpleTokenStore implements TokenStoreInterface
 {
-    private $token;
+    /** @var Token|null */
+    private $token = null;
 
-    public function __construct(string $token = null)
-    {
-        $this->token = $token;
-    }
-
-    public function getToken(): ?string
+    public function getToken(): ?Token
     {
         return $this->token;
     }
 
-    public function setToken(string $token): void
+    public function setToken(Token $token): void
     {
         $this->token = $token;
     }

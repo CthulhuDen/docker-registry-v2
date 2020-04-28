@@ -2,6 +2,7 @@
 
 namespace CthulhuDen\DockerRegistryV2\Authorization\Store;
 
+use CthulhuDen\DockerRegistryV2\Authorization\Token;
 use Psr\SimpleCache\CacheInterface;
 
 class CachedTokenStore implements TokenStoreInterface
@@ -15,19 +16,23 @@ class CachedTokenStore implements TokenStoreInterface
         $this->cacheKey = $cacheKey;
     }
 
-    public function getToken(): ?string
+    public function getToken(): ?Token
     {
         /** @var mixed $token */
         $token = $this->cache->get($this->cacheKey);
         if (is_string($token)) {
-            return $token;
+            /** @var mixed $token */
+            $token = unserialize($token);
+            if ($token instanceof Token) {
+                return $token;
+            }
         }
 
         return null;
     }
 
-    public function setToken(string $token): void
+    public function setToken(Token $token): void
     {
-        $this->cache->set($this->cacheKey, $token);
+        $this->cache->set($this->cacheKey, serialize($token));
     }
 }

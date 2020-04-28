@@ -21,11 +21,6 @@ class AuthorizingClient implements ClientInterface
 
     private $user;
     private $password;
-    /**
-     * @var array<int,string>
-     * @psalm-var list<string>
-     */
-    private $oldScopes = [];
 
     public function __construct(
         ClientInterface $inner,
@@ -52,10 +47,13 @@ class AuthorizingClient implements ClientInterface
 
         if ($response->getStatusCode() === 401) {
             $challenge = $this->extractChallenge($response);
-            $authRequest = $this->createAuthRequest($challenge);
+            list($authRequest, $scopes) = $this->createAuthRequest($challenge);
             $authResponse = $this->sendAuthRequest($authRequest);
 
-            $this->tokenStore->setToken($this->extractToken($authResponse));
+            $strToken = $this->extractToken($authResponse);
+            $token = new Token($strToken, $scopes);
+
+            $this->tokenStore->setToken($token);
 
             $response = $this->sendWithCurrentToken($request);
         }
@@ -66,7 +64,7 @@ class AuthorizingClient implements ClientInterface
     private function sendWithCurrentToken(RequestInterface $request): ResponseInterface
     {
         if (($token = $this->tokenStore->getToken()) !== null) {
-            $request = $request->withHeader('Authorization', "Bearer {$token}");
+            $request = $request->withHeader('Authorization', "Bearer {$token->getToken()}");
         }
 
         return $this->inner->sendRequest($request);
@@ -82,7 +80,10 @@ class AuthorizingClient implements ClientInterface
         return $this->challengeParser->parse($challengeLine);
     }
 
-    protected function createAuthRequest(Challenge $challenge): RequestInterface
+    /**
+     * @psalm-return array{0:RequestInterface,1:list<string>}
+     */
+    protected function createAuthRequest(Challenge $challenge): array
     {
         $authRequest = $this->requestFactory->createRequest('GET', $challenge->getEndpoint());
 
@@ -94,18 +95,20 @@ class AuthorizingClient implements ClientInterface
 
         $scopes = $challenge->getScopes();
 
-        if ($this->keepOldScopes) {
+        if ($this->keepOldScopes && ($oldToken = $this->tokenStore->getToken())) {
+            $allScopes = $oldToken->getScopes();
             foreach ($scopes as $scope) {
-                if (!in_array($scope, $this->oldScopes)) {
-                    $this->oldScopes[] = $scope;
+                if (!in_array($scope, $allScopes)) {
+                    $allScopes[] = $scope;
                 }
             }
-            $scopes = $this->oldScopes;
+
+            $scopes = $allScopes;
         }
 
         if (isset($query['scope'])) {
             if (is_array($query['scope'])) {
-                $query['scope'] = array_filter($query['scope'], 'is_string');
+                $query['scope'] = array_values(array_filter($query['scope'], 'is_string'));
                 $scopes = array_merge($query['scope'], $scopes);
             } else {
                 array_unshift($scopes, (string) $query['scope']);
@@ -120,9 +123,11 @@ class AuthorizingClient implements ClientInterface
             $query .= '&scope=' . urlencode($scope);
         }
 
-        return $authRequest
+        $request = $authRequest
             ->withUri($uri->withQuery($query))
             ->withHeader('Authorization', 'Basic ' . base64_encode("{$this->user}:{$this->password}"));
+
+        return [$request, $scopes];
     }
 
     /**
